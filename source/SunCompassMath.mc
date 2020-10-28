@@ -44,11 +44,19 @@ class SunCompassMath {
         return Math.toDegrees(Math.asin(c));
     }
     
-    function azimuth(decl, lat, hra) {
+    function azimuth(loc, inputs) {
+        var lstm = self.localStandardTimeMerdian(inputs.tzOffset());
+        var eot = self.equationOfTime(inputs.dayOfYear());
+        var tcf  = self.timeCorrectionFactor(inputs.lng(loc), lstm, eot);
+        var decl  = self.declination(inputs.dayOfYear());
+        var lst  = self.localSolarTime(inputs.hour(), tcf);
+        var hra = self.hourAngle(lst);
+        var elevation = self.elevation(decl, inputs.lat(loc), hra);
+    
         var declR = Math.toRadians(decl);
-        var latR  = Math.toRadians(lat);
+        var latR  = Math.toRadians(inputs.lat(loc));
         var hraR  = Math.toRadians(hra);
-        var e     = self.elevation(decl, lat, hra);
+        var e     = self.elevation(decl, inputs.lat(loc), hra);
         var eR    = Math.toRadians(e);
         
         var a = Math.sin(declR) * Math.cos(latR);

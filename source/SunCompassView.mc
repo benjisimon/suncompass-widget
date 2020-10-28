@@ -11,12 +11,12 @@ class SunCompassView extends WatchUi.View {
 	var loc = null;
 	var locStatus = null;
 	var inputs = null;
-	var math = null;
+	var sunMath = null;
 
     function initialize() {
         View.initialize();
         inputs = new SunCompassInputs();
-        math = new SunCompassMath();
+        sunMath = new SunCompassMath();
         Position.enableLocationEvents( Position.LOCATION_ONE_SHOT, method(:onPosition));        
     }
 
@@ -29,7 +29,6 @@ class SunCompassView extends WatchUi.View {
 
     // Load your resources here
     function onLayout(dc) {
-        setLayout(Rez.Layouts.MainLayout(dc));
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -41,36 +40,46 @@ class SunCompassView extends WatchUi.View {
     // Update the view
     function onUpdate(dc) {
         if(loc == null) {
-            var lastLoc = Application.Storage.getValue("location");
-            if(lastLoc != null) {
-                locStatus = "stale";
-                loc = new Position.Location({ 
+            guessLoc();
+        }
+    
+        var azimuth = loc ? sunMath.azimuth(loc, inputs) : "??";
+        
+        dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
+        dc.clear();
+        renderText(dc, azimuth);
+    }
+    
+    function renderText(dc, azimuth) {
+        dc.setColor(Graphics.COLOR_BLUE, Graphics.COLOR_TRANSPARENT);
+        var text = azimuth.format("%d");
+        dc.drawText(dc.getWidth() / 2,
+                    dc.getHeight() * .38,
+                    Graphics.FONT_LARGE,
+                    text,
+                    Graphics.TEXT_JUSTIFY_CENTER);
+                    
+        dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
+        var info = "(" + inputs.lat(loc).format("%0.2f") + "," + inputs.lng(loc).format("%0.2f") + "," + locStatus + ")";
+        dc.drawText(dc.getWidth() / 2,
+                    dc.getHeight() * 0.6,
+                    Graphics.FONT_TINY,
+                    info,
+                    Graphics.TEXT_JUSTIFY_CENTER);                  
+        
+    }
+
+    function guessLoc() {
+        var lastLoc = Application.Storage.getValue("location");
+        if(lastLoc != null) {
+            locStatus = "stale";
+            loc = new Position.Location({ 
                     :latitude => lastLoc[0],
                     :longitude => lastLoc[1],
                     :format => :degrees 
                 }); 
-            }
-        }
-    
-        if(loc) {
-	        var lstm = math.localStandardTimeMerdian(inputs.tzOffset());
-	        var eot = math.equationOfTime(inputs.dayOfYear());
-	        var tcf  = math.timeCorrectionFactor(inputs.lng(loc), lstm, eot);
-	        var decl  = math.declination(inputs.dayOfYear());
-	        var lst  = math.localSolarTime(inputs.hour(), tcf);
-	        var hra = math.hourAngle(lst);
-	        var elevation = math.elevation(decl, inputs.lat(loc), hra);
-            var azimuth = math.azimuth(decl, inputs.lat(loc), hra);
-	        
-	        View.findDrawableById("loc").setText("(" + inputs.lat(loc).format("%.02f") + "," + inputs.lng(loc).format("%.02f") + "," + locStatus + ")");        
-	        View.findDrawableById("info").setText(azimuth.format("%.02f"));       
-	     } else {
-	        View.findDrawableById("loc").setText("(??, ??, ??)");	   
-	        View.findDrawableById("info").setText("??");
-	     }
-        View.onUpdate(dc);
+         }
     }
-
 	
     // Called when this View is removed from the screen. Save the
     // state of this View here. This includes freeing resources from
