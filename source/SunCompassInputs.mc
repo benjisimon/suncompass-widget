@@ -10,8 +10,6 @@ using Toybox.Position;
 
 class SunCompassInputs {
 
-
-    
 	function dayOfYear() {
 		var janFirst = Gregorian.moment({
 			:day => 1,
@@ -19,7 +17,7 @@ class SunCompassInputs {
 		});
 		var today = Gregorian.moment({});
 		var diff = today.subtract(janFirst);
-		return (diff.value() / (60*60*24)) + 1; 
+		return (diff.value() / (60*60*24)); 
 	}
 
 	function lat(info) {

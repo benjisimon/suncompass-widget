@@ -1,7 +1,4 @@
 <layout id="MainLayout">
-	<label id="tz" text="Timezone" x="center" y="5%" justification="Gfx.TEXT_JUSTIFY_CENTER"/>
-	<label id="loc" text="Loc" x="center" y="25%" justification="Gfx.TEXT_JUSTIFY_CENTER"/>
-	<label id="day_of_year" text="Day of Year" x="center" y="45%" justification="Gfx.TEXT_JUSTIFY_CENTER"/>
-	<label id="hour" text="Hour" x="center" y="65%" justification="Gfx.TEXT_JUSTIFY_CENTER"/>
-	
+	<label id="info" text="Loading..." x="center" y="center" justification="Gfx.TEXT_JUSTIFY_CENTER"/>	
+	<label id="loc" text="??,??" x="center" y="80%" font="Gfx.FONT_TINY" justification="Gfx.TEXT_JUSTIFY_CENTER"/>  
 </layout>
