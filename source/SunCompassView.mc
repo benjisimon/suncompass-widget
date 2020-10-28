@@ -3,11 +3,13 @@ using Toybox.System;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Position;
+using Toybox.Application.Storage;
 
 
 class SunCompassView extends WatchUi.View {
 
 	var loc = null;
+	var locStatus = null;
 	var inputs = null;
 	var math = null;
 
@@ -15,11 +17,13 @@ class SunCompassView extends WatchUi.View {
         View.initialize();
         inputs = new SunCompassInputs();
         math = new SunCompassMath();
-        Position.enableLocationEvents( Position.LOCATION_CONTINUOUS, method(:onPosition));        
+        Position.enableLocationEvents( Position.LOCATION_ONE_SHOT, method(:onPosition));        
     }
 
 	function onPosition(info) {
-		loc = info;
+		loc = info.position;
+		locStatus = "fresh";
+		Application.Storage.setValue("location", info.position.toDegrees());
 		WatchUi.requestUpdate();
 	}
 
@@ -36,6 +40,18 @@ class SunCompassView extends WatchUi.View {
 
     // Update the view
     function onUpdate(dc) {
+        if(loc == null) {
+            var lastLoc = Application.Storage.getValue("location");
+            if(lastLoc != null) {
+                locStatus = "stale";
+                loc = new Position.Location({ 
+                    :latitude => lastLoc[0],
+                    :longitude => lastLoc[1],
+                    :format => :degrees 
+                }); 
+            }
+        }
+    
         if(loc) {
 	        var lstm = math.localStandardTimeMerdian(inputs.tzOffset());
 	        var eot = math.equationOfTime(inputs.dayOfYear());
@@ -46,10 +62,10 @@ class SunCompassView extends WatchUi.View {
 	        var elevation = math.elevation(decl, inputs.lat(loc), hra);
             var azimuth = math.azimuth(decl, inputs.lat(loc), hra);
 	        
-	        View.findDrawableById("loc").setText("(" + inputs.lat(loc).format("%.02f") + "," + inputs.lng(loc).format("%.02f") + ")");        
+	        View.findDrawableById("loc").setText("(" + inputs.lat(loc).format("%.02f") + "," + inputs.lng(loc).format("%.02f") + "," + locStatus + ")");        
 	        View.findDrawableById("info").setText(azimuth.format("%.02f"));       
 	     } else {
-	        View.findDrawableById("loc").setText("(??, ??)");	   
+	        View.findDrawableById("loc").setText("(??, ??, ??)");	   
 	        View.findDrawableById("info").setText("??");
 	     }
         View.onUpdate(dc);

@@ -20,12 +20,12 @@ class SunCompassInputs {
 		return (diff.value() / (60*60*24)); 
 	}
 
-	function lat(info) {
-		return info.position.toDegrees()[0];
+	function lat(position) {
+		return position.toDegrees()[0];
 	}
 	
-	function lng(info) {
-		return info.position.toDegrees()[1];
+	function lng(position) {
+		return position.toDegrees()[1];
 	}
 	
 	function tzOffset() {

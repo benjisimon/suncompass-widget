@@ -1,4 +1,4 @@
 <layout id="MainLayout">
-	<label id="info" text="Loading..." x="center" y="center" justification="Gfx.TEXT_JUSTIFY_CENTER"/>	
-	<label id="loc" text="??,??" x="center" y="80%" font="Gfx.FONT_TINY" justification="Gfx.TEXT_JUSTIFY_CENTER"/>  
+	<label id="info" text="Loading..." x="center" y="35%" justification="Gfx.TEXT_JUSTIFY_CENTER"/>	
+	<label id="loc" text="??,??" x="center" y="65%" font="Gfx.FONT_TINY" justification="Gfx.TEXT_JUSTIFY_CENTER"/>  
 </layout>
