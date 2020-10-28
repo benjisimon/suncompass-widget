@@ -8,14 +8,17 @@ using Toybox.Position;
 class SunCompassView extends WatchUi.View {
 
 	var loc = null;
+	var inputs = null;
+	
 
     function initialize() {
         View.initialize();
+        inputs = new SunCompassInputs();
         Position.enableLocationEvents( Position.LOCATION_CONTINUOUS, method(:onPosition));        
     }
 
 	function onPosition(info) {
-		loc = info.position;
+		loc = info;
 		WatchUi.requestUpdate();
 	}
 
@@ -32,34 +35,15 @@ class SunCompassView extends WatchUi.View {
 
     // Update the view
     function onUpdate(dc) {
-    	View.findDrawableById("tz").setText(self.calcTz());
-        View.findDrawableById("day_of_year").setText(self.calcDayOfYear());
-        View.findDrawableById("loc").setText(self.calcLoc());
+        View.findDrawableById("tz").setText(inputs.tzOffset().format("%0d"));
+        View.findDrawableById("loc").setText(loc ? (inputs.lat(loc).format("%.3f") + "," + inputs.lat(loc).format("%.3f")) : "N/A");
+        View.findDrawableById("day_of_year").setText(inputs.dayOfYear().format("%d"));
+        View.findDrawableById("hour").setText(inputs.hour().format("%.2f"));
+        
         View.onUpdate(dc);
     }
 
-	function calcTz() {
-		var t = System.getClockTime(); // ClockTime object
-		return "Tz Off: " + (t.timeZoneOffset / (60 * 60)).format("%02d");
-	}
 	
-	function calcDayOfYear() {
-		var janFirst = Gregorian.moment({
-			:day => 1,
-			:month => Gregorian.MONTH_JANUARY
-		});
-		var today = Gregorian.moment({});
-		var diff = today.subtract(janFirst);
-		var days = (diff.value() / (60*60*24)) + 1;
-		return "D of Y: " + days.format("%d");
-	}
-	
-	function calcLoc() {
-		return loc == null ? "??" : 
-		       loc.toDegrees()[0].format("%.3f") + "," + 
-		       loc.toDegrees()[1].format("%.3f");
-	}
-
     // Called when this View is removed from the screen. Save the
     // state of this View here. This includes freeing resources from
     // memory.
