@@ -48,6 +48,7 @@ class SunCompassView extends WatchUi.View {
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
         renderText(dc, azimuth);
+        renderDial(dc, azimuth);
     }
     
     function renderText(dc, azimuth) {
@@ -67,6 +68,18 @@ class SunCompassView extends WatchUi.View {
                     info,
                     Graphics.TEXT_JUSTIFY_CENTER);                  
         
+    }
+
+    function renderDial(dc, azimuth) {
+      dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
+      dc.drawText(dc.getWidth() / 2, 0, Graphics.FONT_MEDIUM, "N", Graphics.TEXT_JUSTIFY_CENTER);
+      dc.drawText(dc.getWidth(), dc.getHeight() / 2 - textHeight(dc, "E") / 2, Graphics.FONT_MEDIUM, "E", Graphics.TEXT_JUSTIFY_RIGHT);
+      dc.drawText(dc.getWidth() / 2, dc.getHeight() - textHeight(dc, "S"), Graphics.FONT_MEDIUM, "S", Graphics.TEXT_JUSTIFY_CENTER);
+      dc.drawText(0, dc.getHeight() / 2 - textHeight(dc, "W") / 2, Graphics.FONT_MEDIUM, "W", Graphics.TEXT_JUSTIFY_LEFT);      
+    }
+    
+    function textHeight(dc, text) {
+        return dc.getTextDimensions(text, Graphics.FONT_MEDIUM)[1];
     }
 
     function guessLoc() {
