@@ -47,35 +47,67 @@ class SunCompassView extends WatchUi.View {
         
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
-        renderText(dc, azimuth);
-        renderDial(dc, azimuth);
+        self.renderText(dc, azimuth);
+        self.renderDial(dc);
+        self.renderSun(dc, azimuth);
     }
     
     function renderText(dc, azimuth) {
         dc.setColor(Graphics.COLOR_BLUE, Graphics.COLOR_TRANSPARENT);
         var text = azimuth.format("%d");
         dc.drawText(dc.getWidth() / 2,
-                    dc.getHeight() * .38,
+                    dc.getHeight() * .35,
                     Graphics.FONT_LARGE,
                     text,
                     Graphics.TEXT_JUSTIFY_CENTER);
                     
         dc.setColor(Graphics.COLOR_LT_GRAY, Graphics.COLOR_TRANSPARENT);
-        var info = "(" + inputs.lat(loc).format("%0.2f") + "," + inputs.lng(loc).format("%0.2f") + "," + locStatus + ")";
+        var info =  inputs.lat(loc).format("%0.2f") + "," + inputs.lng(loc).format("%0.2f");
+        dc.drawText(dc.getWidth() / 2,
+                    dc.getHeight() * 0.5,
+                    Graphics.FONT_TINY,
+                    info,
+                    Graphics.TEXT_JUSTIFY_CENTER);                       
+ 
         dc.drawText(dc.getWidth() / 2,
                     dc.getHeight() * 0.6,
                     Graphics.FONT_TINY,
-                    info,
-                    Graphics.TEXT_JUSTIFY_CENTER);                  
-        
+                    locStatus,
+                    Graphics.TEXT_JUSTIFY_CENTER);                       
+               
     }
 
-    function renderDial(dc, azimuth) {
-      dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);
-      dc.drawText(dc.getWidth() / 2, 0, Graphics.FONT_MEDIUM, "N", Graphics.TEXT_JUSTIFY_CENTER);
-      dc.drawText(dc.getWidth(), dc.getHeight() / 2 - textHeight(dc, "E") / 2, Graphics.FONT_MEDIUM, "E", Graphics.TEXT_JUSTIFY_RIGHT);
-      dc.drawText(dc.getWidth() / 2, dc.getHeight() - textHeight(dc, "S"), Graphics.FONT_MEDIUM, "S", Graphics.TEXT_JUSTIFY_CENTER);
-      dc.drawText(0, dc.getHeight() / 2 - textHeight(dc, "W") / 2, Graphics.FONT_MEDIUM, "W", Graphics.TEXT_JUSTIFY_LEFT);      
+    function renderDial(dc) {
+        var i = 0;
+        for(i = 0; i < 360; i += 15) {
+            var c = (i % 90 == 0) ? Graphics.COLOR_RED :
+                    Graphics.COLOR_LT_GRAY;
+            self.renderDot(dc, i, c);
+        }
+    }
+    
+    function renderSun(dc, azimuth) {
+        dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
+        dc.setPenWidth(5);
+        var s = self.polToRect(dc, dc.getWidth() / 2 - 30, azimuth);
+        var e = self.polToRect(dc, dc.getWidth() / 2 - 5, azimuth);
+        dc.drawLine(s[0], s[1], e[0], e[1]);
+        
+    }
+    
+    function renderDot(dc, degrees, color) {
+        var p = self.polToRect(dc, dc.getWidth() / 2 - 15, degrees);
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.fillCircle(p[0], p[1], 5);
+    }
+    
+    function polToRect(dc, radius, degrees) {
+        var a = Math.toRadians(degrees - 90);
+        var oX = (radius * Math.cos(a));
+        var oY = (radius * Math.sin(a));
+        var centerX = dc.getWidth() / 2;
+        var centerY = dc.getHeight() / 2;   
+        return [centerX + oX, centerY + oY];
     }
     
     function textHeight(dc, text) {
