@@ -43,13 +43,21 @@ class SunCompassView extends WatchUi.View {
             guessLoc();
         }
     
-        var azimuth = loc ? sunMath.azimuth(loc, inputs) : "??";
+        var nowAzimuth = loc ? sunMath.azimuth(inputs.hour(), loc, inputs) : "??";
+        var sunriseAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunrise", loc, inputs), loc, inputs) : "??";
+        var sunsetAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunset", loc, inputs), loc, inputs) : "??";
         
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
-        self.renderText(dc, azimuth);
+        self.renderText(dc, nowAzimuth);
         self.renderDial(dc);
-        self.renderSun(dc, azimuth);
+        
+        if(loc) {
+            self.renderMark(dc, nowAzimuth, Graphics.COLOR_YELLOW);
+            self.renderMark(dc, sunriseAzimuth, Graphics.COLOR_GREEN);
+            self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_GREEN);
+         }
+        
     }
     
     function renderText(dc, azimuth) {
@@ -86,8 +94,8 @@ class SunCompassView extends WatchUi.View {
         }
     }
     
-    function renderSun(dc, azimuth) {
-        dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
+    function renderMark(dc, azimuth, color) {
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.setPenWidth(5);
         var s = self.polToRect(dc, dc.getWidth() / 2 - 30, azimuth);
         var e = self.polToRect(dc, dc.getWidth() / 2 - 5, azimuth);

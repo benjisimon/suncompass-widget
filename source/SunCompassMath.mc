@@ -44,12 +44,12 @@ class SunCompassMath {
         return Math.toDegrees(Math.asin(c));
     }
     
-    function azimuth(loc, inputs) {
+    function azimuth(hour, loc, inputs) {
         var lstm = self.localStandardTimeMerdian(inputs.tzOffset());
         var eot = self.equationOfTime(inputs.dayOfYear());
         var tcf  = self.timeCorrectionFactor(inputs.lng(loc), lstm, eot);
         var decl  = self.declination(inputs.dayOfYear());
-        var lst  = self.localSolarTime(inputs.hour(), tcf);
+        var lst  = self.localSolarTime(hour, tcf);
         var hra = self.hourAngle(lst);
         var elevation = self.elevation(decl, inputs.lat(loc), hra);
     
@@ -65,4 +65,18 @@ class SunCompassMath {
         var d = Math.toDegrees(Math.acos(c / Math.cos(eR)));
         return hra < 0 ? d : (360 - d);
     }
+    
+
+    function timeOf(event, loc, inputs) {
+        var latR = Math.toRadians(inputs.lat(loc));
+        var declR = Math.toRadians(self.declination(inputs.dayOfYear()));
+        var lstm = self.localStandardTimeMerdian(inputs.tzOffset());
+        var eot = self.equationOfTime(inputs.dayOfYear());
+        var tcf  = self.timeCorrectionFactor(inputs.lng(loc), lstm, eot);
+        
+        var a = (1.0 / 15.0) * 
+                Math.toDegrees(Math.acos(-1 * Math.tan(latR) * Math.tan(declR)));
+        var b = tcf / 60;
+        return event.equals("sunrise") ? (12 - a - b) : (12 + a - b); 
+     }
 }
