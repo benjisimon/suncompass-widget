@@ -46,11 +46,16 @@ class SunCompassView extends WatchUi.View {
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
  
-        self.renderDial(dc);
             
         if(loc) {
-            self.renderUi(dc, loc);
+            var azimuth = sunMath.azimuth(inputs.hour(), loc, inputs);
+            var offsets = [ 0, 360 - azimuth ];
+            for(var i = 1; i <= 4; i++) {
+                offsets.add(offsets[i] + 90);
+            }
+            self.renderUi(dc, loc, offsets[0]);
         } else {
+            self.renderDial(dc, 0);
             dc.drawText(dc.getWidth() / 2,
                         dc.getHeight() / 2,
                         Graphics.FONT_MEDIUM,
@@ -60,15 +65,16 @@ class SunCompassView extends WatchUi.View {
         
     }
     
-    function renderUi(dc, loc) {
+    function renderUi(dc, loc, rotate) {
         var nowAzimuth = loc ? sunMath.azimuth(inputs.hour(), loc, inputs) : 0;
         var sunriseAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunrise", loc, inputs), loc, inputs) : 0;
         var sunsetAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunset", loc, inputs), loc, inputs) : 0;
         
+        self.renderDial(dc, rotate);     
         self.renderText(dc, nowAzimuth);
-        self.renderMark(dc, nowAzimuth, Graphics.COLOR_YELLOW);
-        self.renderMark(dc, sunriseAzimuth, Graphics.COLOR_GREEN);
-        self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_GREEN); 
+        self.renderMark(dc, nowAzimuth, Graphics.COLOR_YELLOW, rotate);
+        self.renderMark(dc, sunriseAzimuth, Graphics.COLOR_GREEN, rotate);
+        self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_GREEN, rotate); 
     }
     
     function renderText(dc, azimuth) {
@@ -96,30 +102,30 @@ class SunCompassView extends WatchUi.View {
                
     }
 
-    function renderDial(dc) {
+    function renderDial(dc, rotate) {
         var i = 0;
         for(i = 0; i < 360; i += 15) {
             if(i % 90 == 0) {
                 var colors = [ Graphics.COLOR_RED, Graphics.COLOR_YELLOW, Graphics.COLOR_PURPLE, Graphics.COLOR_YELLOW ];
-                self.renderDot(dc, i, colors[i / 90], 5);
+                self.renderDot(dc, i, colors[i / 90], 5, rotate);
             } else {
-                self.renderDot(dc, i, Graphics.COLOR_LT_GRAY, 2);
+                self.renderDot(dc, i, Graphics.COLOR_LT_GRAY, 2, rotate);
             }
         }
     }
 
     
-    function renderMark(dc, azimuth, color) {
+    function renderMark(dc, azimuth, color, rotate) {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.setPenWidth(5);
-        var s = self.polToRect(dc, dc.getWidth() / 2 - 30, azimuth);
-        var e = self.polToRect(dc, dc.getWidth() / 2 - 5, azimuth);
+        var s = self.polToRect(dc, dc.getWidth() / 2 - 30, azimuth + rotate);
+        var e = self.polToRect(dc, dc.getWidth() / 2 - 5, azimuth + rotate);
         dc.drawLine(s[0], s[1], e[0], e[1]);
         
     }
     
-    function renderDot(dc, degrees, color, diameter) {
-        var p = self.polToRect(dc, dc.getWidth() / 2 - 15, degrees);
+    function renderDot(dc, degrees, color, diameter, rotate) {
+        var p = self.polToRect(dc, dc.getWidth() / 2 - 15, degrees + rotate);
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.fillCircle(p[0], p[1], diameter);
     }
