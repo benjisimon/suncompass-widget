@@ -43,22 +43,32 @@ class SunCompassView extends WatchUi.View {
             guessLoc();
         }
     
-        var nowAzimuth = loc ? sunMath.azimuth(inputs.hour(), loc, inputs) : 0;
-        var sunriseAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunrise", loc, inputs), loc, inputs) : 0;
-        var sunsetAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunset", loc, inputs), loc, inputs) : 0;
-        
         dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_BLACK);
         dc.clear();
  
         self.renderDial(dc);
             
         if(loc) {
-            self.renderText(dc, nowAzimuth);
-            self.renderMark(dc, nowAzimuth, Graphics.COLOR_YELLOW);
-            self.renderMark(dc, sunriseAzimuth, Graphics.COLOR_GREEN);
-            self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_GREEN);
-         }
+            self.renderUi(dc, loc);
+        } else {
+            dc.drawText(dc.getWidth() / 2,
+                        dc.getHeight() / 2,
+                        Graphics.FONT_MEDIUM,
+                        "Loading...",
+                        Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        }
         
+    }
+    
+    function renderUi(dc, loc) {
+        var nowAzimuth = loc ? sunMath.azimuth(inputs.hour(), loc, inputs) : 0;
+        var sunriseAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunrise", loc, inputs), loc, inputs) : 0;
+        var sunsetAzimuth = loc ? sunMath.azimuth(sunMath.timeOf("sunset", loc, inputs), loc, inputs) : 0;
+        
+        self.renderText(dc, nowAzimuth);
+        self.renderMark(dc, nowAzimuth, Graphics.COLOR_YELLOW);
+        self.renderMark(dc, sunriseAzimuth, Graphics.COLOR_GREEN);
+        self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_GREEN); 
     }
     
     function renderText(dc, azimuth) {
