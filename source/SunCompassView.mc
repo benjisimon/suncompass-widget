@@ -3,8 +3,15 @@ using Toybox.System;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Position;
-using Toybox.Application.Storage;
+using Toybox.Application;
 
+var compassView = 0;
+
+function nextCompassView() {
+    compassView = (compassView + 1) % 5;
+    Application.Storage.setValue("view", compassView);
+    WatchUi.requestUpdate(); 
+}
 
 class SunCompassView extends WatchUi.View {
 
@@ -12,12 +19,14 @@ class SunCompassView extends WatchUi.View {
 	var locStatus = null;
 	var inputs = null;
 	var sunMath = null;
-
+    
     function initialize() {
         View.initialize();
         inputs = new SunCompassInputs();
         sunMath = new SunCompassMath();
-        Position.enableLocationEvents( Position.LOCATION_ONE_SHOT, method(:onPosition));        
+        Position.enableLocationEvents( Position.LOCATION_ONE_SHOT, method(:onPosition));
+        var view = Application.Storage.getValue("view");
+        compassView = view == null ? 0 : view;
     }
 
 	function onPosition(info) {
@@ -27,15 +36,6 @@ class SunCompassView extends WatchUi.View {
 		WatchUi.requestUpdate();
 	}
 
-    // Load your resources here
-    function onLayout(dc) {
-    }
-
-    // Called when this View is brought to the foreground. Restore
-    // the state of this View and prepare it to be shown. This includes
-    // loading resources into memory.
-    function onShow() {
-    }
 
     // Update the view
     function onUpdate(dc) {
@@ -53,7 +53,7 @@ class SunCompassView extends WatchUi.View {
             for(var i = 1; i <= 4; i++) {
                 offsets.add(offsets[i] + 90);
             }
-            self.renderUi(dc, loc, offsets[0]);
+            self.renderUi(dc, loc, offsets[compassView]);
         } else {
             self.renderDial(dc, 0);
             dc.drawText(dc.getWidth() / 2,
@@ -74,7 +74,7 @@ class SunCompassView extends WatchUi.View {
         self.renderText(dc, nowAzimuth);
         self.renderMark(dc, nowAzimuth, Graphics.COLOR_YELLOW, rotate);
         self.renderMark(dc, sunriseAzimuth, Graphics.COLOR_GREEN, rotate);
-        self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_GREEN, rotate); 
+        self.renderMark(dc, sunsetAzimuth, Graphics.COLOR_BLUE, rotate); 
     }
     
     function renderText(dc, azimuth) {
@@ -106,7 +106,7 @@ class SunCompassView extends WatchUi.View {
         var i = 0;
         for(i = 0; i < 360; i += 15) {
             if(i % 90 == 0) {
-                var colors = [ Graphics.COLOR_RED, Graphics.COLOR_YELLOW, Graphics.COLOR_PURPLE, Graphics.COLOR_YELLOW ];
+                var colors = [ Graphics.COLOR_RED, Graphics.COLOR_GREEN, Graphics.COLOR_WHITE, Graphics.COLOR_BLUE ];
                 self.renderDot(dc, i, colors[i / 90], 5, rotate);
             } else {
                 self.renderDot(dc, i, Graphics.COLOR_LT_GRAY, 2, rotate);

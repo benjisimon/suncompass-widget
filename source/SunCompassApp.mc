@@ -17,7 +17,7 @@ class SunCompassApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() {
-        return [ new SunCompassView() ];
+        return [ new SunCompassView(), new SunCompassDelegate() ];
     }
 
 }
