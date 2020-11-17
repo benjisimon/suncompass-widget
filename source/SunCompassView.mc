@@ -89,11 +89,15 @@ class SunCompassView extends WatchUi.View {
     function renderDial(dc) {
         var i = 0;
         for(i = 0; i < 360; i += 15) {
-            var c = (i % 90 == 0) ? Graphics.COLOR_RED :
-                    Graphics.COLOR_LT_GRAY;
-            self.renderDot(dc, i, c);
+            if(i % 90 == 0) {
+                var colors = [ Graphics.COLOR_RED, Graphics.COLOR_YELLOW, Graphics.COLOR_PURPLE, Graphics.COLOR_YELLOW ];
+                self.renderDot(dc, i, colors[i / 90], 5);
+            } else {
+                self.renderDot(dc, i, Graphics.COLOR_LT_GRAY, 2);
+            }
         }
     }
+
     
     function renderMark(dc, azimuth, color) {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
@@ -104,10 +108,10 @@ class SunCompassView extends WatchUi.View {
         
     }
     
-    function renderDot(dc, degrees, color) {
+    function renderDot(dc, degrees, color, diameter) {
         var p = self.polToRect(dc, dc.getWidth() / 2 - 15, degrees);
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-        dc.fillCircle(p[0], p[1], 5);
+        dc.fillCircle(p[0], p[1], diameter);
     }
     
     function polToRect(dc, radius, degrees) {
